@@ -1,0 +1,24 @@
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import col, avg
+
+spark = SparkSession.builder \
+    .appName("Exemplo de Big Data com PySpark") \
+    .getOrCreate()
+
+df = spark.read.csv("caminho/para/dataset.csv", header=True, inferSchema=True)
+
+df.show(5)
+df.printSchema()
+
+df_filtrado = df.filter(df['sales'] > 100)
+df_filtrado.show(5)
+
+df_agrupado = df_filtrado.groupBy("product_category").agg(avg(col("sales")).alias("media_vendas"))
+df_agrupado.show(5)
+
+df_ordenado = df_agrupado.orderBy(col("media_vendas").desc())
+df_ordenado.show(5)
+
+df_ordenado.write.csv("caminho/para/salvar/resultado.csv")
+
+spark.stop()
